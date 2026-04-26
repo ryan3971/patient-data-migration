@@ -96,7 +96,7 @@ class PatientImportService
     # Stage 4 — validate identity fields
     # Validate identity fields — write failed import_row and move on
     if health_number.blank? || health_number_province.blank?
-      record_failure(row_number, health_number, health_number_province,
+      record_import_failure(row_number, health_number, health_number_province,
                      'Missing health number or province')
       @import.increment!(:failed_count)
       return
@@ -104,7 +104,7 @@ class PatientImportService
 
     # Check format — must be digits only
     unless valid_health_number?(health_number)
-      record_failure(row_number, health_number, health_number_province,
+      record_import_failure(row_number, health_number, health_number_province,
                      "Invalid health number format: '#{health_number}' must contain only digits")
       @import.increment!(:failed_count)
       return
@@ -137,7 +137,7 @@ class PatientImportService
     end
 
   rescue => e
-    record_failure(row_number, health_number, health_number_province, e.message)
+    record_import_failure(row_number, health_number, health_number_province, e.message)
     @import.increment!(:failed_count)
   end
 
@@ -145,11 +145,10 @@ class PatientImportService
     value.present? && value.match?(/\A\d+\z/)
   end
 
-  def record_failure(row_number, health_number, health_number_province, reason)
-    ImportRow.create!(
+  def record_import_failure(row_number, health_number, health_number_province, reason)
+    ImportFailure.create!(
       import:                 @import,
       row_number:             row_number,
-      status:                 :failed,
       health_number:          health_number,
       health_number_province: health_number_province,
       failure_reason:         reason

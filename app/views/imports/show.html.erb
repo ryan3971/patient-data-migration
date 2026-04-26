@@ -49,32 +49,29 @@
       </tr>
     </tbody>
   </table>
-
-  <% if @import.import_rows.any? %>
-    <h2>Row Detail</h2>
-    <table class="row-detail-table">
-      <thead>
+<% if @import.import_failures.any? %>
+  <h2>Failed Rows</h2>
+  <table class="row-detail-table">
+    <thead>
+      <tr>
+        <th>Row</th>
+        <th>Health Number</th>
+        <th>Province</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @import.import_failures.order(:row_number).each do |failure| %>
         <tr>
-          <th>Row</th>
-          <th>Status</th>
-          <th>Health Number</th>
-          <th>Province</th>
-          <th>Reason</th>
+          <td><%= failure.row_number %></td>
+          <td><%= failure.health_number || '—' %></td>
+          <td><%= failure.health_number_province || '—' %></td>
+          <td><%= failure.failure_reason %></td>
         </tr>
-      </thead>
-      <tbody>
-        <% @import.import_rows.order(:row_number).each do |import_row| %>
-          <tr class="row--<%= import_row.status %>">
-            <td><%= import_row.row_number %></td>
-            <td><%= import_row.status.capitalize %></td>
-            <td><%= import_row.health_number || '—' %></td>
-            <td><%= import_row.health_number_province || '—' %></td>
-            <td><%= import_row.failure_reason || '—' %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% end %>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
 
   <%= link_to 'Upload another file', root_path %>
 </div>
