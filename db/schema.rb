@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_26_011801) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_26_200627) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
+  create_table "import_failures", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "failure_reason"
+    t.string "health_number"
+    t.string "health_number_province"
+    t.bigint "import_id", null: false
+    t.integer "row_number", null: false
+    t.datetime "updated_at", null: false
+    t.index ["import_id"], name: "index_import_failures_on_import_id"
+  end
+
   create_table "imports", force: :cascade do |t|
     t.datetime "completed_at"
     t.datetime "created_at", null: false
@@ -47,5 +61,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_011801) do
     t.index ["import_id"], name: "index_patients_on_import_id"
   end
 
+  add_foreign_key "import_failures", "imports"
   add_foreign_key "patients", "imports"
 end

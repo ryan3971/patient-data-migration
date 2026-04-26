@@ -1,0 +1,80 @@
+<%# app/views/imports/show.html.erb %>
+
+<div class="container">
+  <h1>Import Results</h1>
+
+  <%= render 'flash' %>
+
+  <div class="import-status">
+    <span class="status status--<%= @import.status %>">
+      <%= @import.status.capitalize %>
+    </span>
+  </div>
+
+  <% if @import.failed? %>
+    <div class="error-message">
+      <strong>Error:</strong> <%= @import.error_message %>
+    </div>
+  <% end %>
+
+  <table class="results-table">
+    <tbody>
+      <tr>
+        <td>Filename</td>
+        <td><%= @import.filename || '—' %></td>
+      </tr>
+      <tr>
+        <td>Total rows</td>
+        <td><%= @import.total_rows || '—' %></td>
+      </tr>
+      <tr>
+        <td>Patients created</td>
+        <td><%= @import.created_count %></td>
+      </tr>
+      <tr>
+        <td>Patients skipped</td>
+        <td><%= @import.skipped_count %></td>
+      </tr>
+      <tr>
+        <td>Rows failed</td>
+        <td><%= @import.failed_count %></td>
+      </tr>
+      <tr>
+        <td>Started</td>
+        <td><%= @import.started_at&.strftime('%B %d, %Y at %H:%M:%S') || '—' %></td>
+      </tr>
+      <tr>
+        <td>Completed</td>
+        <td><%= @import.completed_at&.strftime('%B %d, %Y at %H:%M:%S') || '—' %></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <% if @import.import_rows.any? %>
+    <h2>Row Detail</h2>
+    <table class="row-detail-table">
+      <thead>
+        <tr>
+          <th>Row</th>
+          <th>Status</th>
+          <th>Health Number</th>
+          <th>Province</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @import.import_rows.order(:row_number).each do |import_row| %>
+          <tr class="row--<%= import_row.status %>">
+            <td><%= import_row.row_number %></td>
+            <td><%= import_row.status.capitalize %></td>
+            <td><%= import_row.health_number || '—' %></td>
+            <td><%= import_row.health_number_province || '—' %></td>
+            <td><%= import_row.failure_reason || '—' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <%= link_to 'Upload another file', root_path %>
+</div>

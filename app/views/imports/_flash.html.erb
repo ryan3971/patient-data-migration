@@ -1,0 +1,13 @@
+<%# app/views/imports/_flash.html.erb %>
+
+<% if flash[:error].present? %>
+  <div class="flash flash--error">
+    <%= flash[:error] %>
+  </div>
+<% end %>
+
+<% if flash[:notice].present? %>
+  <div class="flash flash--notice">
+    <%= flash[:notice] %>
+  </div>
+<% end %>

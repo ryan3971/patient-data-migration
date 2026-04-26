@@ -1,0 +1,17 @@
+<%# app/views/imports/index.html.erb %>
+
+<div class="container">
+  <h1>Patient Data Import</h1>
+  <p>Upload a CSV file to migrate patient demographics into the system.</p>
+
+  <%= render 'flash' %>
+
+  <%= form_with url: imports_path, method: :post, multipart: true do |f| %>
+    <div class="field">
+      <%= f.label :file, 'Select CSV file' %>
+      <%= f.file_field :file, accept: '.csv' %>
+    </div>
+
+    <%= f.submit 'Upload and Import' %>
+  <% end %>
+</div>
