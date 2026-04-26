@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  filename: MyString
+  total_rows: 1
+  status: 1
+  error_message: MyText
+  created_count: 1
+  skipped_count: 1
+  failed_count: 1
+  started_at: 2026-04-25 18:17:48
+  completed_at: 2026-04-25 18:17:48
+
+two:
+  filename: MyString
+  total_rows: 1
+  status: 1
+  error_message: MyText
+  created_count: 1
+  skipped_count: 1
+  failed_count: 1
+  started_at: 2026-04-25 18:17:48
+  completed_at: 2026-04-25 18:17:48

@@ -1,0 +1,35 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  import: one
+  health_number: MyString
+  health_number_province: MyString
+  first_name: MyString
+  last_name: MyString
+  middle_name: MyString
+  date_of_birth: 2026-04-25
+  sex: MyString
+  phone_number: MyString
+  email: MyString
+  address_line_1: MyString
+  address_line_2: MyString
+  address_city: MyString
+  address_province: MyString
+  address_postal_code: MyString
+
+two:
+  import: two
+  health_number: MyString
+  health_number_province: MyString
+  first_name: MyString
+  last_name: MyString
+  middle_name: MyString
+  date_of_birth: 2026-04-25
+  sex: MyString
+  phone_number: MyString
+  email: MyString
+  address_line_1: MyString
+  address_line_2: MyString
+  address_city: MyString
+  address_province: MyString
+  address_postal_code: MyString
