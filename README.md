@@ -61,6 +61,62 @@ The CSV must include the following headers (case-sensitive, exact spacing):
 
 Rows with a missing or non-numeric health identifier are recorded as failures and do not halt the import.
 
+## Design Decisions
+
+### Row-by-row vs Bulk Insert
+
+Row-by-row processing was chosen over bulk insert for the following reasons:
+
+| Concern | Row-by-row | Bulk insert |
+|---|---|---|
+| Memory | One row in memory at a time | Entire CSV buffered |
+| Bad rows | Skipped individually; rest continue | One bad row can abort the batch |
+| Duplicate detection | `find_or_create_by` per row | Must pre-filter existing records |
+| Complexity | Straightforward loop | More moving parts |
+
+### Idempotency
+
+Three options were considered when an identical file is re-uploaded:
+
+- **A)** Overwrite everything
+- **B)** Fill blanks only
+- **C) Skip existing entirely** ← chosen
+
+Option C was chosen because A and B require assumptions about update intent that would need explicit validation. It also keeps the import relationship clean: an `Import` record only points to patients it created. Allowing updates would complicate that relationship.
+
+### Transaction Scope
+
+Each row is wrapped in its own transaction. A save error on one row records a failure and moves on; it does not roll back the entire import. For a file with millions of rows, aborting the whole operation on one bad row is a poor use of time and resources.
+
+### Table Count
+
+A clinic table was considered but deemed out of scope. Header validation happens at import time against one fixed expected set. Different clinic formats would be addressed once clinics are properly modelled.
+
+### Patient Address Columns
+
+Address fields are kept on the `patients` table rather than split into a separate table. A separate table only makes sense when a patient may have multiple addresses. A strict one-to-one relationship is overhead for a join with no benefit.
+
+### File Upload
+
+MIME type checking is sufficient for a trusted internal tool. For a public-facing endpoint, content sniffing would be added. In a larger setup, the upload would go directly to S3 via a pre-signed URL — keeping large files off the app server — and the import job would be placed on an async queue. Virus scanning would also apply in that context.
+
+### `pending` Status
+
+The `Import` status begins at `running` in the current implementation. The `pending` state is reserved for a future async flow where uploaded files are queued before processing begins.
+
+## Assumptions
+
+- CSV headers are validated against one fixed expected set. Different clinic formats are a future problem, addressed when clinics are properly modelled.
+- Health identifiers are expected to be numeric. Non-numeric values (e.g. `"unknow"`) are treated as invalid and recorded as failures rather than inserted.
+
+## Scalability
+
+The row-by-row approach keeps memory usage flat regardless of file size — only one row is in memory at a time. For files with millions of rows this avoids out-of-memory failures and means a bad row near the end of the file does not waste the work already done.
+
+## Future Work
+
+The `import_failures` table stores the row number, identity fields, and failure reason for every rejected row. A natural next feature would be reprocessing failed rows after the source data is corrected, without requiring a full re-upload.
+
 ## Architecture
 
 ### Models
@@ -80,7 +136,7 @@ Rows with a missing or non-numeric health identifier are recorded as failures an
 
 **`Patient`** — a single patient record. Unique on `(health_number, health_number_province)`. Linked to the import that created it.
 
-**`ImportFailure`** — one row per failed CSV row, recording the row number, the identity fields (if present), and the reason for failure.
+**`ImportFailure`** — one row per failed CSV row, recording the row number, the identity fields (if present), and the reason for failure. This table was added after discovering that a row had silently failed to be created with no way to identify which one — manual scanning does not scale to large files. The `health_number` column stores the raw string value that was present (e.g. `"unknow"`), even when it is invalid, so the failure is auditable.
 
 ### Service
 
